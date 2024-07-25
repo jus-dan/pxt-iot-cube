@@ -1,6 +1,6 @@
 /**
 * IoT-Wuerfel
-* GBS St. Gallen, 2026
+* GBS St. Gallen, 2024
 *
 * Main IoTCube
 * This file defines the namespace "IoTCube" and impelemts all LoRa functions.

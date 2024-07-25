@@ -1,6 +1,6 @@
 /**
 * IoT-Wuerfel
-* GBS St. Gallen, 2024
+* GBS St. Gallen, 2026
 *
 * Main IoTCube
 * This file defines the namespace "IoTCube" and impelemts all LoRa functions.
@@ -10,11 +10,11 @@
 /**
  * Loops for background tasks
  */
-basic.forever(function() {
+basic.forever(function () {
     IoTCube.serialListener()
 })
 
-loops.everyInterval(1500, function() {
+loops.everyInterval(1500, function () {
     IoTCube.watchdog()
 })
 
@@ -22,8 +22,8 @@ loops.everyInterval(1500, function() {
 
 //% color="#00796b" icon="\uf1eb" block="IoT Cube"
 namespace IoTCube {
-    let message: string= ""
-    let RxPort: number=0
+    let message: string = ""
+    let RxPort: number = 0
     let evtMessage: string = ""
     let status: number = 0
     export let MCP23008 = new MCP(MCP_Defaults.I2C_ADDRESS, MCP_Defaults.IODIR, MCP_Defaults.GPIO)
@@ -49,7 +49,7 @@ namespace IoTCube {
     export function getEventMessage() {
         return evtMessage
     }
-    
+
     //% blockId=GetLatestMessage
     //% block="Get serial message"
     //% subcategory="Configuration" group="Device"
@@ -60,7 +60,7 @@ namespace IoTCube {
     //% blockId=writeATCommand
     //% block="AT | Command %typ Paramter %value"
     //% subcategory="Configuration" group="Device"
-    export function writeATCommand(typ: string, value: string){
+    export function writeATCommand(typ: string, value: string) {
         let command = "AT+" + typ + "=" + value
         writeSerial(command)
     }
@@ -73,7 +73,7 @@ namespace IoTCube {
     //% block="Get | Parameter %typ"
     //% subcategory="Configuration" group="Device"
     export function getParameter(typ: eRUI3_PARAM) {
-        let command = "AT+" + strRAK_PARAM[typ] + "=?"       
+        let command = "AT+" + strRAK_PARAM[typ] + "=?"
         basic.pause(30)
         writeSerial(command)
         basic.pause(70)
@@ -98,8 +98,8 @@ namespace IoTCube {
      * Device Control
      */
 
-    export function setStatus(mask: eSTATUS_MASK, state: number){
-        if (state){
+    export function setStatus(mask: eSTATUS_MASK, state: number) {
+        if (state) {
             status = status | mask
         }
         else {
@@ -111,7 +111,7 @@ namespace IoTCube {
     //% block="Get Device Status Bit %mask"
     //% group="Device"
     export function getStatus(mask: eSTATUS_MASK): boolean {
-        if (status & mask){
+        if (status & mask) {
             return true
         }
         return false
@@ -151,7 +151,7 @@ namespace IoTCube {
     //% hardReset.defl=false
     //% group="Device"
     export function resetModule(hardReset?: boolean) {
-        if(hardReset){
+        if (hardReset) {
             MCP23008.setPin(MCP_Pins.RAK_RST, true)
             basic.pause(100)
             MCP23008.setPin(MCP_Pins.RAK_RST, false)
@@ -171,7 +171,7 @@ namespace IoTCube {
     //% time.shadow=timePicker
     //% group="Device"
     export function sleep(time: number) {
-        if(!getStatus(eSTATUS_MASK.SLEEP)){
+        if (!getStatus(eSTATUS_MASK.SLEEP)) {
             writeATCommand("SLEEP", time.toString())
             setStatus(eSTATUS_MASK.SLEEP, 1)
             setStatus(eSTATUS_MASK.READY, 0)
@@ -193,7 +193,7 @@ namespace IoTCube {
     //% Band.defl=eBands.EU868
     //% subcategory="Configuration" group="Setup" weight=100
     export function OTAA_Setup(AppEUI: string, DevEUI: string, AppKey: string, Band: eBands, devClass: string = "A", overwrite?: eBool) {
-        if(overwrite){
+        if (overwrite) {
             setStatus(eSTATUS_MASK.SETUP, 1)
             setParameter(eRUI3_PARAM.NWM, "1")              //Set work mode LoRaWAN
             basic.pause(50)
@@ -201,7 +201,7 @@ namespace IoTCube {
             basic.pause(50)
             setParameter(eRUI3_PARAM.CLASS, devClass)       //Set class
             basic.pause(50)
-            setParameter(eRUI3_PARAM.BAND, Band.toString()) 
+            setParameter(eRUI3_PARAM.BAND, Band.toString())
             basic.pause(50)
             setParameter(eRUI3_PARAM.DEVEUI, DevEUI)
             basic.pause(50)
@@ -211,7 +211,7 @@ namespace IoTCube {
             basic.pause(100)
             resetModule()
             basic.pause(300)
-            if(getParameter(eRUI3_PARAM.DEVEUI) == DevEUI){     // check written values
+            if (getParameter(eRUI3_PARAM.DEVEUI) == DevEUI) {     // check written values
                 setEvent(eRAK_EVT.SETUP_SUCCECSS)
             }
             setStatus(eSTATUS_MASK.SETUP, 0)
@@ -228,7 +228,7 @@ namespace IoTCube {
     //% Band.defl=eBands.EU868
     //% subcategory="Configuration" group="Setup"
     export function ABP_Setup(DEVADDR: string, APPSKEY: string, NWKSKEY: string, Band: eBands, devClass: string = "A", overwrite?: eBool) {
-        if(overwrite){
+        if (overwrite) {
             setStatus(eSTATUS_MASK.SETUP, 1)
             setParameter(eRUI3_PARAM.NWM, "1")              //Set work mode LoRaWAN
             basic.pause(50)
@@ -252,7 +252,7 @@ namespace IoTCube {
             setStatus(eSTATUS_MASK.SETUP, 0)
         }
     }
-    
+
     /**
      * Join LoRa network
      * @param join allows connect or disconnect.
@@ -265,7 +265,7 @@ namespace IoTCube {
     //% interval.defl=10, attempts.defl=8
     //% subcategory="Configuration" group="Setup" weight=120
     export function LoRa_Join(join: eBool = eBool.enable, auto_join: eBool = eBool.enable, interval?: number, attempts?: number) {
-        writeATCommand("JOIN", join + ":" + auto_join + ":" + interval + ":" + attempts )
+        writeATCommand("JOIN", join + ":" + auto_join + ":" + interval + ":" + attempts)
         setStatus(eSTATUS_MASK.CONNECT, 1)
     }
 
@@ -291,7 +291,7 @@ namespace IoTCube {
     //% fport.min=1
     //% fport.max=223
     //%fport.defl=1
-    export function SendBuffer(data: Buffer=getCayenne(), fport?: number,) {
+    export function SendBuffer(data: Buffer = getCayenne(), fport?: number,) {
         writeATCommand("SEND", fport + ":" + data.toHex())
     }
 
